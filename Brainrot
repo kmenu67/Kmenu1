@@ -1,0 +1,151 @@
+--// KMENU HUB | Escape Tsunami for Brainrot
+--// UI: TBoy Roblox UI Library
+--// Build: Full Basic (Stable)
+
+-- LOAD UI LIBRARY
+local Library = loadstring(game:HttpGet(
+	"https://raw.githubusercontent.com/TBoyRoblox/UILibrary/main/source.lua"
+))()
+
+-- SERVICES
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local ProximityPromptService = game:GetService("ProximityPromptService")
+local TeleportService = game:GetService("TeleportService")
+local player = Players.LocalPlayer
+
+-- CHARACTER BIND
+local char, hrp, hum
+local function bindChar(c)
+	char = c
+	hum = c:WaitForChild("Humanoid")
+	hrp = c:WaitForChild("HumanoidRootPart")
+end
+if player.Character then bindChar(player.Character) end
+player.CharacterAdded:Connect(bindChar)
+
+-- COORDINATES (CHỈNH NẾU MAP KHÁC)
+local SAFE_POS = Vector3.new(0, 200, 0)
+local CELESTIAL_POS = Vector3.new(2604.2, -3.08, 8.24)
+
+-- WINDOW
+local Window = Library:MakeWindow({
+	Hub = {
+		Title = "KMENU HUB",
+		Animation = "Escape Tsunami"
+	},
+	Key = {
+		KeySystem = false
+	}
+})
+
+-- MINIMIZE BUTTON
+Library:MinimizeButton({
+	Image = "http://www.roblox.com/asset/?id=83190276951914",
+	Size = {60, 60},
+	Color = Color3.fromRGB(15,15,15),
+	Corner = true
+})
+
+-- TABS
+local Main = Window:MakeTab({Name = "Main"})
+local Tele = Window:MakeTab({Name = "Teleport"})
+local Misc = Window:MakeTab({Name = "Misc"})
+
+------------------------------------------------
+-- GOD MODE (LOCAL)
+------------------------------------------------
+local god = false
+Main:AddToggle({
+	Name = "God Mode (Local)",
+	Default = false,
+	Callback = function(v)
+		god = v
+	end
+})
+
+RunService.Heartbeat:Connect(function()
+	if god and hum then
+		hum.MaxHealth = 1e9
+		hum.Health = hum.MaxHealth
+	end
+end)
+
+------------------------------------------------
+-- INSTANT INTERACT (BỎ GIỮ E)
+------------------------------------------------
+local instant = false
+Main:AddToggle({
+	Name = "Instant Interact",
+	Default = false,
+	Callback = function(v)
+		instant = v
+	end
+})
+
+ProximityPromptService.PromptButtonHoldBegan:Connect(function(p)
+	if instant then
+		p.HoldDuration = 0
+	end
+end)
+
+------------------------------------------------
+-- MAX ZOOM
+------------------------------------------------
+Main:AddButton({
+	Name = "Unlock Max Zoom",
+	Callback = function()
+		player.CameraMaxZoomDistance = 1e6
+		player.CameraMinZoomDistance = 0.5
+	end
+})
+
+------------------------------------------------
+-- TELEPORT
+------------------------------------------------
+Tele:AddButton({
+	Name = "TP Safe (High Ground)",
+	Callback = function()
+		if hrp then
+			hrp.CFrame = CFrame.new(SAFE_POS)
+		end
+	end
+})
+
+------------------------------------------------
+-- TP CELESTIAL (SPAM)
+------------------------------------------------
+local tpCelestial = false
+
+Tele:AddToggle({
+	Name = "TP Celestial (Spam)",
+	Default = false,
+	Callback = function(v)
+		tpCelestial = v
+	end
+})
+
+task.spawn(function()
+	while task.wait(0.15) do
+		if tpCelestial and hrp then
+			hrp.CFrame = CFrame.new(CELESTIAL_POS)
+		end
+	end
+end)
+
+------------------------------------------------
+-- MISC
+------------------------------------------------
+Misc:AddButton({
+	Name = "Rejoin Server",
+	Callback = function()
+		TeleportService:Teleport(game.PlaceId)
+	end
+})
+
+Misc:AddButton({
+	Name = "Print KMENU Status",
+	Callback = function()
+		print("KMENU HUB loaded & running")
+	end
+})
