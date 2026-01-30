@@ -1,0 +1,116 @@
+--// SIMPLE POTION HUB
+--// Save 10 Potion Positions + TP + QoL
+
+-- SERVICES
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local ProximityPromptService = game:GetService("ProximityPromptService")
+
+local player = Players.LocalPlayer
+local char, hrp
+
+local function bindChar(c)
+	char = c
+	hrp = c:WaitForChild("HumanoidRootPart")
+end
+if player.Character then bindChar(player.Character) end
+player.CharacterAdded:Connect(bindChar)
+
+-- COORDS
+local CELESTIAL = Vector3.new(2604.2, -3.08, 8.24)
+
+-- POTION STORAGE
+local PotionSlots = {}
+for i = 1, 10 do
+	PotionSlots[i] = nil
+end
+
+-- UI (Rayfield)
+local Rayfield = loadstring(game:HttpGet("https://sirius.menu/rayfield"))()
+
+local Window = Rayfield:CreateWindow({
+	Name = "Potion Save Hub",
+	LoadingTitle = "Potion Hub",
+	LoadingSubtitle = "Không xàm",
+	ConfigurationSaving = { Enabled = false }
+})
+
+local Main = Window:CreateTab("Main", 4483362458)
+local PotionTab = Window:CreateTab("Potions", 4483362458)
+
+-- =====================
+-- INSTANT PROMPT
+-- =====================
+local instant = false
+Main:CreateToggle({
+	Name = "Instant ProximityPrompt",
+	CurrentValue = false,
+	Callback = function(v)
+		instant = v
+	end
+})
+
+ProximityPromptService.PromptButtonHoldBegan:Connect(function(p)
+	if instant then
+		p.HoldDuration = 0
+	end
+end)
+
+-- =====================
+-- MAX ZOOM
+-- =====================
+Main:CreateButton({
+	Name = "Max Zoom",
+	Callback = function()
+		player.CameraMaxZoomDistance = 1e6
+		player.CameraMinZoomDistance = 0.5
+	end
+})
+
+-- =====================
+-- TP CELESTIAL (SPAM)
+-- =====================
+local tpCelestial = false
+Main:CreateToggle({
+	Name = "TP Celestial (Spam)",
+	CurrentValue = false,
+	Callback = function(v)
+		tpCelestial = v
+	end
+})
+
+task.spawn(function()
+	while task.wait(0.1) do
+		if tpCelestial and hrp then
+			hrp.CFrame = CFrame.new(CELESTIAL)
+		end
+	end
+end)
+
+-- =====================
+-- POTION SAVE / TP
+-- =====================
+for i = 1, 10 do
+	PotionTab:CreateButton({
+		Name = "Save Potion "..i,
+		Callback = function()
+			if hrp then
+				PotionSlots[i] = hrp.CFrame
+				Rayfield:Notify({
+					Title = "Saved",
+					Content = "Potion "..i.." saved",
+					Duration = 2
+				})
+			end
+		end
+	})
+
+	PotionTab:CreateButton({
+		Name = "TP Potion "..i,
+		Callback = function()
+			if hrp and PotionSlots[i] then
+				hrp.CFrame = PotionSlots[i]
+			end
+		end
+	})
+end
