@@ -1,142 +1,108 @@
--- ==============================
--- KMENU WRAPPER
--- ==============================
+--================= KEY SYSTEM =================--
+local REQUIRED_KEY = "KP"
 
--- CONFIG
-local VALID_KEY = "FREE_Kmenu123"
-local PHUCMAX_SCRIPT = "https://raw.githubusercontent.com/phucmax743874/Script/refs/heads/main/THANHPHUC2.lua"
-local CELESTIAL_POS = Vector3.new(2604.2, -3.08, 8.24)
-
--- SERVICES
 local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
-local UIS = game:GetService("UserInputService")
-local lp = Players.LocalPlayer
+local player = Players.LocalPlayer
 
--- ==============================
--- KEY UI
--- ==============================
+local guiKey = Instance.new("ScreenGui", game.CoreGui)
+guiKey.Name = "KeyUI"
 
-local keyGui = Instance.new("ScreenGui", game.CoreGui)
-keyGui.Name = "KMENU_KEY"
-
-local frame = Instance.new("Frame", keyGui)
-frame.Size = UDim2.fromScale(0.6, 0.35)
-frame.Position = UDim2.fromScale(0.2, 0.3)
-frame.BackgroundColor3 = Color3.fromRGB(25,25,30)
-frame.Active = true
-frame.Draggable = true
-Instance.new("UICorner", frame).CornerRadius = UDim.new(0,16)
-
-local title = Instance.new("TextLabel", frame)
-title.Size = UDim2.new(1,0,0.25,0)
-title.Text = "KMENU KEY SYSTEM"
-title.TextScaled = true
-title.TextColor3 = Color3.new(1,1,1)
-title.BackgroundTransparency = 1
+local frame = Instance.new("Frame", guiKey)
+frame.Size = UDim2.new(0, 300, 0, 150)
+frame.Position = UDim2.new(0.5, -150, 0.4, 0)
+frame.BackgroundColor3 = Color3.fromRGB(25,25,25)
+Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 20)
 
 local box = Instance.new("TextBox", frame)
-box.Size = UDim2.fromScale(0.8, 0.25)
-box.Position = UDim2.fromScale(0.1, 0.35)
-box.PlaceholderText = "Enter key..."
+box.Size = UDim2.new(0.8, 0, 0, 40)
+box.Position = UDim2.new(0.1, 0, 0.25, 0)
+box.PlaceholderText = "Enter Key"
 box.Text = ""
 box.TextScaled = true
-box.BackgroundColor3 = Color3.fromRGB(40,40,45)
+box.Font = Enum.Font.Gotham
+box.BackgroundColor3 = Color3.fromRGB(40,40,40)
 box.TextColor3 = Color3.new(1,1,1)
-Instance.new("UICorner", box).CornerRadius = UDim.new(0,12)
+Instance.new("UICorner", box)
 
-local btn = Instance.new("TextButton", frame)
-btn.Size = UDim2.fromScale(0.6, 0.22)
-btn.Position = UDim2.fromScale(0.2, 0.68)
-btn.Text = "VERIFY"
-btn.TextScaled = true
-btn.BackgroundColor3 = Color3.fromRGB(60,60,80)
-btn.TextColor3 = Color3.new(1,1,1)
-Instance.new("UICorner", btn).CornerRadius = UDim.new(0,12)
+local btnKey = Instance.new("TextButton", frame)
+btnKey.Size = UDim2.new(0.6, 0, 0, 40)
+btnKey.Position = UDim2.new(0.2, 0, 0.6, 0)
+btnKey.Text = "UNLOCK"
+btnKey.TextScaled = true
+btnKey.Font = Enum.Font.GothamBold
+btnKey.BackgroundColor3 = Color3.fromRGB(180,60,60)
+btnKey.TextColor3 = Color3.new(1,1,1)
+Instance.new("UICorner", btnKey)
 
--- ==============================
--- VERIFY KEY
--- ==============================
+--================= MAIN SCRIPT =================--
+local function startScript()
+	guiKey:Destroy()
 
-btn.Activated:Connect(function()
-	if box.Text ~= VALID_KEY then
-		btn.Text = "WRONG KEY"
-		task.delay(1, function()
-			btn.Text = "VERIFY"
-		end)
-		return
+	-- load phucmax
+	pcall(function()
+		loadstring(game:HttpGet("https://raw.githubusercontent.com/phucmax743874/Script/refs/heads/main/THANHPHUC2.lua"))()
+	end)
+
+	local RunService = game:GetService("RunService")
+
+	-- celestial coord REAL
+	local CELESTIAL = CFrame.new(2604.2, -3.08, 8.24)
+
+	local char, hrp
+	local function bindChar(c)
+		char = c
+		hrp = c:WaitForChild("HumanoidRootPart")
 	end
+	if player.Character then bindChar(player.Character) end
+	player.CharacterAdded:Connect(bindChar)
 
-	-- PASS KEY
-	keyGui:Destroy()
-
-	-- LOAD PHUCMAX SCRIPT
-	loadstring(game:HttpGet(PHUCMAX_SCRIPT, true))()
-
-	-- ==============================
-	-- DRAG SHORTCUT TP CELESTIAL
-	-- ==============================
-
-	local spam = false
-	local conn
-
+	-- UI Shortcut
 	local gui = Instance.new("ScreenGui", game.CoreGui)
 	gui.Name = "CelestialShortcut"
 
-	local tpBtn = Instance.new("TextButton", gui)
-	tpBtn.Size = UDim2.fromScale(0.18, 0.07)
-	tpBtn.Position = UDim2.fromScale(0.4, 0.8)
-	tpBtn.Text = "CELESTIAL"
-	tpBtn.TextScaled = true
-	tpBtn.BackgroundColor3 = Color3.fromRGB(35,35,35)
-	tpBtn.TextColor3 = Color3.new(1,1,1)
-	tpBtn.Active = true
-	Instance.new("UICorner", tpBtn).CornerRadius = UDim.new(0,14)
+	local title = Instance.new("TextLabel", gui)
+	title.Size = UDim2.new(0, 420, 0, 40)
+	title.Position = UDim2.new(0.5, -210, 0.4, -110)
+	title.BackgroundTransparency = 1
+	title.Text = "SECRET RESPAWN"
+	title.TextScaled = true
+	title.Font = Enum.Font.GothamBold
+	title.TextColor3 = Color3.fromRGB(80,220,200)
 
-	-- DRAG
-	local dragging, dragStart, startPos = false
+	local btn = Instance.new("TextButton", gui)
+	btn.Size = UDim2.new(0, 420, 0, 90)
+	btn.Position = UDim2.new(0.5, -210, 0.4, -60)
+	btn.BackgroundColor3 = Color3.fromRGB(150,60,60)
+	btn.Text = "OFF"
+	btn.TextScaled = true
+	btn.Font = Enum.Font.GothamBold
+	btn.TextColor3 = Color3.new(1,1,1)
+	btn.AutoButtonColor = false
+	btn.Active = true
+	btn.Draggable = true
+	btn.BorderSizePixel = 0
 
-	tpBtn.InputBegan:Connect(function(input)
-		if input.UserInputType == Enum.UserInputType.Touch then
-			dragging = true
-			dragStart = input.Position
-			startPos = tpBtn.Position
-		end
+	Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 45)
+
+	local enabled = false
+	btn.MouseButton1Click:Connect(function()
+		enabled = not enabled
+		btn.Text = enabled and "ON" or "OFF"
+		btn.BackgroundColor3 = enabled and Color3.fromRGB(60,180,90) or Color3.fromRGB(150,60,60)
 	end)
 
-	tpBtn.InputEnded:Connect(function(input)
-		if input.UserInputType == Enum.UserInputType.Touch then
-			dragging = false
+	RunService.Heartbeat:Connect(function()
+		if enabled and hrp then
+			hrp.CFrame = CELESTIAL
 		end
 	end)
+end
 
-	UIS.InputChanged:Connect(function(input)
-		if dragging and input.UserInputType == Enum.UserInputType.Touch then
-			local delta = input.Position - dragStart
-			tpBtn.Position = UDim2.new(
-				startPos.X.Scale,
-				startPos.X.Offset + delta.X,
-				startPos.Y.Scale,
-				startPos.Y.Offset + delta.Y
-			)
-		end
-	end)
-
-	-- TP LOGIC
-	tpBtn.Activated:Connect(function()
-		spam = not spam
-		tpBtn.Text = spam and "STOP TP" or "CELESTIAL"
-
-		if spam then
-			conn = RunService.Heartbeat:Connect(function()
-				local char = lp.Character
-				local hrp = char and char:FindFirstChild("HumanoidRootPart")
-				if hrp then
-					hrp.CFrame = CFrame.new(CELESTIAL_POS)
-				end
-			end)
-		else
-			if conn then conn:Disconnect() end
-		end
-	end)
+btnKey.MouseButton1Click:Connect(function()
+	if box.Text == REQUIRED_KEY then
+		startScript()
+	else
+		box.Text = ""
+		box.PlaceholderText = "WRONG KEY"
+	end
 end)
